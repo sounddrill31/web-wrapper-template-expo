@@ -1,7 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, useColorScheme, BackHandler, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
@@ -70,7 +69,6 @@ export default function App() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar style="auto" />
       <View style={styles.statusBarPlaceholder} />
       <WebView
         ref={webViewRef}
