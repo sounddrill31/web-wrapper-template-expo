@@ -1,5 +1,5 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { View, TouchableOpacity, StyleSheet, useColorScheme, BackHandler, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,9 +44,11 @@ export default function App() {
   }, []);
 
   const goBack = () => {
-    if (webViewRef.current) {
+    if (webViewRef.current && canGoBack) {
       webViewRef.current.goBack();
+      return true; // Indicate that we've handled the back action
     }
+    return false; // Let the system handle the back action
   };
 
   const goHome = () => {
@@ -55,6 +57,16 @@ export default function App() {
       webViewRef.current.reload();
     }
   };
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        return goBack();
+      });
+
+      return () => backHandler.remove();
+    }
+  }, [canGoBack]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
