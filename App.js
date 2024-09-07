@@ -15,6 +15,7 @@ export default function App() {
   const colorScheme = useColorScheme();
   const [isBarVisible, setIsBarVisible] = useState(true);
   const barHeight = useRef(new Animated.Value(80)).current;
+  const toggleButtonBottom = useRef(new Animated.Value(90)).current;
 
   const isDarkMode = colorScheme === 'dark';
 
@@ -59,14 +60,22 @@ export default function App() {
     }
   };
 
-
   const toggleBar = () => {
-    setIsBarVisible(!isBarVisible);
-    Animated.timing(barHeight, {
-      toValue: isBarVisible ? 0 : 80,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    const newIsBarVisible = !isBarVisible;
+    setIsBarVisible(newIsBarVisible);
+    
+    Animated.parallel([
+      Animated.timing(barHeight, {
+        toValue: newIsBarVisible ? 80 : 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(toggleButtonBottom, {
+        toValue: newIsBarVisible ? 90 : 10,
+        duration: 300,
+        useNativeDriver: false,
+      })
+    ]).start();
   };
 
   useEffect(() => {
@@ -112,12 +121,17 @@ export default function App() {
           <Ionicons name="home" size={28} color={theme.iconColor} />
         </TouchableOpacity>
       </Animated.View>
-      <TouchableOpacity 
-        style={[styles.toggleButton, { backgroundColor: theme.toggleButtonBackground }]} 
-        onPress={toggleBar}
-      >
-        <Ionicons name={isBarVisible ? "chevron-down" : "chevron-up"} size={24} color={theme.iconColor} />
-      </TouchableOpacity>
+      <Animated.View style={[
+        styles.toggleButton,
+        { 
+          bottom: toggleButtonBottom,
+          backgroundColor: theme.toggleButtonBackground 
+        }
+      ]}>
+        <TouchableOpacity onPress={toggleBar}>
+          <Ionicons name={isBarVisible ? "chevron-down" : "chevron-up"} size={24} color={theme.iconColor} />
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -173,9 +187,9 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     position: 'absolute',
-    bottom: 90,
     right: 20,
     borderRadius: 20,
-    padding: 8,
+    padding: 12,
+    zIndex: 1000,
   },
 });
