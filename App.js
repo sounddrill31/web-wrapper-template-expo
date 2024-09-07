@@ -14,15 +14,15 @@ export default function App() {
   const [currentUrl, setCurrentUrl] = useState(HOME_URL);
   const colorScheme = useColorScheme();
   const [isBarVisible, setIsBarVisible] = useState(true);
-  const barHeight = useRef(new Animated.Value(60)).current;
+  const barHeight = useRef(new Animated.Value(80)).current;
 
   const isDarkMode = colorScheme === 'dark';
 
   const theme = {
-    barBackground: isDarkMode ? 'rgba(40, 40, 40, 0.9)' : 'rgba(240, 240, 240, 0.9)',
-    buttonBackground: isDarkMode ? 'rgba(60, 60, 60, 0.8)' : 'rgba(220, 220, 220, 0.8)',
+    barBackground: isDarkMode ? '#1E1E1E' : '#F5F5F5',
+    buttonBackground: isDarkMode ? '#333333' : '#E0E0E0',
     iconColor: isDarkMode ? '#FFFFFF' : '#000000',
-    toggleButtonBackground: isDarkMode ? 'rgba(60, 60, 60, 0.8)' : 'rgba(220, 220, 220, 0.8)',
+    toggleButtonBackground: isDarkMode ? 'rgba(30, 30, 30, 0.8)' : 'rgba(245, 245, 245, 0.8)',
   };
 
   const handleNavigationStateChange = (navState) => {
@@ -63,7 +63,7 @@ export default function App() {
   const toggleBar = () => {
     setIsBarVisible(!isBarVisible);
     Animated.timing(barHeight, {
-      toValue: isBarVisible ? 0 : 60,
+      toValue: isBarVisible ? 0 : 80,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -103,13 +103,13 @@ export default function App() {
           onPress={goBack}
           disabled={!canGoBack}
         >
-          <Ionicons name="arrow-back" size={24} color={canGoBack ? theme.iconColor : theme.iconColor + '66'} />
+          <Ionicons name="arrow-back" size={28} color={canGoBack ? theme.iconColor : theme.iconColor + '66'} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonBackground }]}
           onPress={goHome}
         >
-          <Ionicons name="home" size={24} color={theme.iconColor} />
+          <Ionicons name="home" size={28} color={theme.iconColor} />
         </TouchableOpacity>
       </Animated.View>
       <TouchableOpacity 
@@ -136,22 +136,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingBottom: Platform.OS === 'ios' ? 20 : 0, // Account for iOS home indicator
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
   button: {
-    borderRadius: 25,
-    padding: 12,
-    margin: 8,
+    borderRadius: 30,
+    padding: 16,
+    margin: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   toggleButton: {
     position: 'absolute',
-    bottom: 70,
+    bottom: 90,
     right: 20,
     borderRadius: 20,
     padding: 8,
