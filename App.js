@@ -4,12 +4,16 @@ import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
+const HOME_URL = 'https://github.com/login';
+
 export default function App() {
   const webViewRef = useRef(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState(HOME_URL);
 
   const handleNavigationStateChange = (navState) => {
     setCanGoBack(navState.canGoBack);
+    setCurrentUrl(navState.url);
   };
 
   const goBack = () => {
@@ -20,7 +24,8 @@ export default function App() {
 
   const goHome = () => {
     if (webViewRef.current) {
-      webViewRef.current.loadUrl('https://github.com/login');
+      setCurrentUrl(HOME_URL);
+      webViewRef.current.reload();
     }
   };
 
@@ -29,7 +34,7 @@ export default function App() {
       <StatusBar style="auto" />
       <WebView
         ref={webViewRef}
-        source={{ uri: 'https://github.com/login' }}
+        source={{ uri: currentUrl }}
         style={styles.webview}
         onNavigationStateChange={handleNavigationStateChange}
       />
