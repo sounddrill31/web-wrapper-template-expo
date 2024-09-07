@@ -1,11 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 
 const HOME_URL = 'https://github.com/login';
+const HOME_DOMAIN = 'github.com';
 
 export default function App() {
   const webViewRef = useRef(null);
@@ -13,10 +15,33 @@ export default function App() {
   const [currentUrl, setCurrentUrl] = useState(HOME_URL);
   const colorScheme = useColorScheme();
 
+  const isDarkMode = colorScheme === 'dark';
+
+  const theme = {
+    background: isDarkMode ? '#121212' : '#FFFFFF',
+    surface: isDarkMode ? '#1E1E1E' : '#F5F5F5',
+    primary: isDarkMode ? '#BB86FC' : '#6200EE',
+    onSurface: isDarkMode ? '#FFFFFF' : '#000000',
+  };
+
   const handleNavigationStateChange = (navState) => {
     setCanGoBack(navState.canGoBack);
     setCurrentUrl(navState.url);
   };
+
+  const getDomainFromUrl = (url) => {
+    const matches = url.match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
+    return matches && matches[1];
+  };
+
+  const handleShouldStartLoadWithRequest = useCallback((event) => {
+    const domain = getDomainFromUrl(event.url);
+    if (domain && domain.toLowerCase() !== HOME_DOMAIN) {
+      Linking.openURL(event.url);
+      return false; // Prevent WebView from loading the URL
+    }
+    return true; // Allow WebView to load the URL
+  }, []);
 
   const goBack = () => {
     if (webViewRef.current) {
@@ -31,15 +56,6 @@ export default function App() {
     }
   };
 
-  const isDarkMode = colorScheme === 'dark';
-
-  const theme = {
-    background: isDarkMode ? '#121212' : '#FFFFFF',
-    surface: isDarkMode ? '#1E1E1E' : '#F5F5F5',
-    primary: isDarkMode ? '#BB86FC' : '#6200EE',
-    onSurface: isDarkMode ? '#FFFFFF' : '#000000',
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar style="auto" />
@@ -49,6 +65,7 @@ export default function App() {
         source={{ uri: currentUrl }}
         style={styles.webview}
         onNavigationStateChange={handleNavigationStateChange}
+        onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
       />
       <View style={[styles.bottomBar, { backgroundColor: theme.surface }]}>
         <TouchableOpacity
