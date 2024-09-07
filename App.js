@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
@@ -12,16 +12,6 @@ export default function App() {
   const [canGoBack, setCanGoBack] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(HOME_URL);
   const colorScheme = useColorScheme();
-
-  const isDarkMode = colorScheme === 'dark';
-
-  const theme = {
-    background: isDarkMode ? '#121212' : '#FFFFFF',
-    surface: isDarkMode ? '#1E1E1E' : '#F5F5F5',
-    primary: isDarkMode ? '#BB86FC' : '#6200EE',
-    onBackground: isDarkMode ? '#FFFFFF' : '#000000',
-    onSurface: isDarkMode ? '#FFFFFF' : '#000000',
-  };
 
   const handleNavigationStateChange = (navState) => {
     setCanGoBack(navState.canGoBack);
@@ -41,26 +31,24 @@ export default function App() {
     }
   };
 
-  const injectedJavaScript = `
-    (function() {
-      document.body.style.backgroundColor = '${theme.background}';
-      document.body.style.color = '${theme.onBackground}';
-      var styleElement = document.createElement('style');
-      styleElement.textContent = 'a { color: ${theme.primary} }';
-      document.head.appendChild(styleElement);
-    })();
-  `;
+  const isDarkMode = colorScheme === 'dark';
+
+  const theme = {
+    background: isDarkMode ? '#121212' : '#FFFFFF',
+    surface: isDarkMode ? '#1E1E1E' : '#F5F5F5',
+    primary: isDarkMode ? '#BB86FC' : '#6200EE',
+    onSurface: isDarkMode ? '#FFFFFF' : '#000000',
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar style={isDarkMode ? "light" : "dark"} />
+      <StatusBar style="auto" />
       <View style={styles.statusBarPlaceholder} />
       <WebView
         ref={webViewRef}
         source={{ uri: currentUrl }}
         style={styles.webview}
         onNavigationStateChange={handleNavigationStateChange}
-        injectedJavaScript={injectedJavaScript}
       />
       <View style={[styles.bottomBar, { backgroundColor: theme.surface }]}>
         <TouchableOpacity
@@ -94,7 +82,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    elevation: 4,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   button: {
     padding: 8,
