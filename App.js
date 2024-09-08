@@ -28,6 +28,17 @@ export default function App() {
     toggleButtonBackground: isDarkMode ? 'rgba(30, 30, 30, 0.8)' : 'rgba(245, 245, 245, 0.8)',
   };
 
+  // Safely render Ionicons
+  const renderIcon = (name, size, color) => {
+    return (
+      <Ionicons
+        name={name}
+        size={size}
+        color={color}
+      />
+    );
+  };
+
   const handleNavigationStateChange = (navState) => {
     setCanGoBack(navState.canGoBack);
     setCurrentUrl(navState.url);
@@ -198,13 +209,13 @@ export default function App() {
           onPress={goBack}
           disabled={!canGoBack}
         >
-          <Ionicons name="arrow-back" size={28} color={canGoBack ? theme.iconColor : theme.iconColor + '66'} />
+          {renderIcon('arrow-back', 28, canGoBack ? theme.iconColor : theme.iconColor + '66')}
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonBackground }]}
           onPress={goHome}
         >
-          <Ionicons name="home" size={28} color={theme.iconColor} />
+          {renderIcon('home', 28, theme.iconColor)}
         </TouchableOpacity>
       </Animated.View>
       <Animated.View style={[
@@ -216,11 +227,7 @@ export default function App() {
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
-          <Ionicons 
-            name={isBarVisible ? "chevron-down" : "chevron-up"}
-            size={34} 
-            color={theme.iconColor} 
-          />
+          {renderIcon(isBarVisible ? "chevron-down" : "chevron-up", 34, theme.iconColor)}
         </TouchableOpacity>
       </Animated.View>
     </View>
