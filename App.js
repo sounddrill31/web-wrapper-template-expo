@@ -152,8 +152,8 @@ export default function App() {
     toggleButton: {
       position: 'absolute',
       right: 20,
-      borderRadius: 20,
-      padding: 12,
+      borderRadius: 30,
+      padding: 16,
       zIndex: 1000,
     },
   });
@@ -218,7 +218,7 @@ export default function App() {
         <TouchableOpacity onPress={toggleBar}>
           <Ionicons 
             name={isBarVisible ? "chevron-down" : "chevron-up"}
-            size={24} 
+            size={34} 
             color={theme.iconColor} 
           />
         </TouchableOpacity>
