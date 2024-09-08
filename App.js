@@ -62,23 +62,29 @@ export default function App() {
     }
   };
 
+  const barAnimation = useRef(new Animated.Value(1)).current;
+  const toggleButtonAnimation = useRef(new Animated.Value(0)).current;
+
   const toggleBar = () => {
     const newIsBarVisible = !isBarVisible;
     setIsBarVisible(newIsBarVisible);
     
     Animated.parallel([
-      Animated.timing(barHeight, {
-        toValue: newIsBarVisible ? 80 : 0,
-        duration: 300,
-        useNativeDriver: false,
+      Animated.spring(barAnimation, {
+        toValue: newIsBarVisible ? 1 : 0,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
       }),
-      Animated.timing(toggleButtonBottom, {
-        toValue: newIsBarVisible ? 90 : 10,
-        duration: 300,
-        useNativeDriver: false,
+      Animated.spring(toggleButtonAnimation, {
+        toValue: newIsBarVisible ? 0 : 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
       })
     ]).start();
   };
+
 
   useEffect(() => {
     const subscription = ScreenOrientation.addOrientationChangeListener((event) => {
@@ -116,21 +122,19 @@ export default function App() {
       flexDirection: isLandscape ? 'column' : 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      borderTopLeftRadius: isLandscape ? 0 : 25,
-      borderTopRightRadius: isLandscape ? 25 : 25,
-      borderBottomRightRadius: isLandscape ? 25 : 0,
+      borderTopLeftRadius: 25,
+      borderTopRightRadius: 25,
       position: 'absolute',
-      bottom: isLandscape ? 0 : 0,
-      left: isLandscape ? undefined : 0,
+      bottom: 0,
+      left: 0,
       right: 0,
-      top: isLandscape ? 0 : undefined,
-      width: isLandscape ? 80 : '100%',
-      height: isLandscape ? '100%' : 80,
-      paddingBottom: Platform.OS === 'ios' && !isLandscape ? 20 : 0,
+      height: 80,
+      paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+      overflow: 'hidden',
       ...Platform.select({
         ios: {
           shadowColor: '#000',
-          shadowOffset: { width: isLandscape ? -3 : 0, height: isLandscape ? 0 : -3 },
+          shadowOffset: { width: 0, height: -3 },
           shadowOpacity: 0.1,
           shadowRadius: 3,
         },
@@ -139,6 +143,7 @@ export default function App() {
         },
       }),
     },
+
     button: {
       borderRadius: 30,
       padding: 16,
@@ -165,6 +170,22 @@ export default function App() {
     },
   });
 
+
+  const barTranslateY = barAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [80, 0],
+  });
+
+  const barScale = barAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.9, 1],
+  });
+
+  const toggleButtonTranslateY = toggleButtonAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -70],
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.statusBarPlaceholder} />
@@ -178,8 +199,10 @@ export default function App() {
       <Animated.View style={[
         styles.bottomBar,
         { 
-          height: isLandscape ? '100%' : barHeight,
-          width: isLandscape ? 80 : '100%',
+          transform: [
+            { translateY: barTranslateY },
+            { scale: barScale }
+          ],
           backgroundColor: theme.barBackground 
         }
       ]}>
@@ -200,17 +223,13 @@ export default function App() {
       <Animated.View style={[
         styles.toggleButton,
         { 
-          bottom: isLandscape ? 20 : toggleButtonBottom,
-          right: isLandscape ? 90 : 20,
+          transform: [{ translateY: toggleButtonTranslateY }],
           backgroundColor: theme.toggleButtonBackground 
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
           <Ionicons 
-            name={isLandscape 
-              ? (isBarVisible ? "chevron-back" : "chevron-forward") 
-              : (isBarVisible ? "chevron-down" : "chevron-up")
-            } 
+            name={isBarVisible ? "chevron-down" : "chevron-up"}
             size={24} 
             color={theme.iconColor} 
           />
