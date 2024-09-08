@@ -1,9 +1,10 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, useColorScheme, BackHandler, Platform, Animated } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, useColorScheme, BackHandler, Platform, Animated, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const HOME_URL = 'https://github.com/login';
 const HOME_DOMAIN = 'github.com';
@@ -16,6 +17,7 @@ export default function App() {
   const [isBarVisible, setIsBarVisible] = useState(true);
   const barHeight = useRef(new Animated.Value(80)).current;
   const toggleButtonBottom = useRef(new Animated.Value(90)).current;
+  const [orientation, setOrientation] = useState('PORTRAIT');
 
   const isDarkMode = colorScheme === 'dark';
 
@@ -40,17 +42,17 @@ export default function App() {
     const domain = getDomainFromUrl(event.url);
     if (domain && domain.toLowerCase() !== HOME_DOMAIN) {
       Linking.openURL(event.url);
-      return false; // Prevent WebView from loading the URL
+      return false;
     }
-    return true; // Allow WebView to load the URL
+    return true;
   }, []);
 
   const goBack = () => {
     if (webViewRef.current && canGoBack) {
       webViewRef.current.goBack();
-      return true; // Indicate that we've handled the back action
+      return true;
     }
-    return false; // Let the system handle the back action
+    return false;
   };
 
   const goHome = () => {
@@ -79,6 +81,16 @@ export default function App() {
   };
 
   useEffect(() => {
+    const subscription = ScreenOrientation.addOrientationChangeListener((event) => {
+      setOrientation(event.orientationInfo.orientation);
+    });
+
+    return () => {
+      ScreenOrientation.removeOrientationChangeListener(subscription);
+    };
+  }, []);
+
+  useEffect(() => {
     if (Platform.OS === 'android') {
       const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
         return goBack();
@@ -88,10 +100,70 @@ export default function App() {
     }
   }, [canGoBack]);
 
-  // Force re-render when colorScheme changes
-  useEffect(() => {
-    // This empty dependency array ensures the effect runs only when colorScheme changes
-  }, [colorScheme]);
+  const isLandscape = orientation === 'LANDSCAPE_LEFT' || orientation === 'LANDSCAPE_RIGHT';
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    statusBarPlaceholder: {
+      height: Constants.statusBarHeight,
+    },
+    webview: {
+      flex: 1,
+    },
+    bottomBar: {
+      flexDirection: isLandscape ? 'column' : 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      borderTopLeftRadius: isLandscape ? 0 : 25,
+      borderTopRightRadius: isLandscape ? 25 : 25,
+      borderBottomRightRadius: isLandscape ? 25 : 0,
+      position: 'absolute',
+      bottom: isLandscape ? 0 : 0,
+      left: isLandscape ? undefined : 0,
+      right: 0,
+      top: isLandscape ? 0 : undefined,
+      width: isLandscape ? 80 : '100%',
+      height: isLandscape ? '100%' : 80,
+      paddingBottom: Platform.OS === 'ios' && !isLandscape ? 20 : 0,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: isLandscape ? -3 : 0, height: isLandscape ? 0 : -3 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+    button: {
+      borderRadius: 30,
+      padding: 16,
+      margin: 10,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
+    },
+    toggleButton: {
+      position: 'absolute',
+      right: isLandscape ? 90 : 20,
+      bottom: isLandscape ? 20 : 90,
+      borderRadius: 20,
+      padding: 12,
+      zIndex: 1000,
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -105,7 +177,11 @@ export default function App() {
       />
       <Animated.View style={[
         styles.bottomBar,
-        { height: barHeight, backgroundColor: theme.barBackground }
+        { 
+          height: isLandscape ? '100%' : barHeight,
+          width: isLandscape ? 80 : '100%',
+          backgroundColor: theme.barBackground 
+        }
       ]}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonBackground }]}
@@ -124,72 +200,22 @@ export default function App() {
       <Animated.View style={[
         styles.toggleButton,
         { 
-          bottom: toggleButtonBottom,
+          bottom: isLandscape ? 20 : toggleButtonBottom,
+          right: isLandscape ? 90 : 20,
           backgroundColor: theme.toggleButtonBackground 
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
-          <Ionicons name={isBarVisible ? "chevron-down" : "chevron-up"} size={24} color={theme.iconColor} />
+          <Ionicons 
+            name={isLandscape 
+              ? (isBarVisible ? "chevron-back" : "chevron-forward") 
+              : (isBarVisible ? "chevron-down" : "chevron-up")
+            } 
+            size={24} 
+            color={theme.iconColor} 
+          />
         </TouchableOpacity>
       </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  statusBarPlaceholder: {
-    height: Constants.statusBarHeight,
-  },
-  webview: {
-    flex: 1,
-  },
-  bottomBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0, // Account for iOS home indicator
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  button: {
-    borderRadius: 30,
-    padding: 16,
-    margin: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  toggleButton: {
-    position: 'absolute',
-    right: 20,
-    borderRadius: 20,
-    padding: 12,
-    zIndex: 1000,
-  },
-});
