@@ -14,9 +14,9 @@ export default function App() {
   const [canGoBack, setCanGoBack] = useState(false);
   const [currentUrl, setCurrentUrl] = useState(HOME_URL);
   const colorScheme = useColorScheme();
-  const [isBarVisible, setIsBarVisible] = useState(true);
+  const [isBarVisible, setIsBarVisible] = useState(false);
   const barHeight = useRef(new Animated.Value(80)).current;
-  const toggleButtonBottom = useRef(new Animated.Value(90)).current;
+  const toggleButtonBottom = useRef(new Animated.Value(20)).current;
   const [orientation, setOrientation] = useState('PORTRAIT');
 
   const isDarkMode = colorScheme === 'dark';
@@ -62,7 +62,7 @@ export default function App() {
     }
   };
 
-  const barAnimation = useRef(new Animated.Value(1)).current;
+  const barAnimation = useRef(new Animated.Value(0)).current;
 
   const toggleBar = () => {
     const newIsBarVisible = !isBarVisible;
@@ -133,7 +133,6 @@ export default function App() {
         },
       }),
     },
-
     button: {
       borderRadius: 30,
       padding: 16,
@@ -152,14 +151,12 @@ export default function App() {
     },
     toggleButton: {
       position: 'absolute',
-      right: isLandscape ? 90 : 20,
-      bottom: isLandscape ? 20 : 90,
+      right: 20,
       borderRadius: 20,
       padding: 12,
       zIndex: 1000,
     },
   });
-
 
   const barTranslateY = barAnimation.interpolate({
     inputRange: [0, 1],
@@ -173,7 +170,7 @@ export default function App() {
 
   const toggleButtonTranslateY = barAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -10], // Adjusted these values to position the button just above the bar
+    outputRange: [0, -80],
   });
 
   return (
@@ -214,7 +211,8 @@ export default function App() {
         styles.toggleButton,
         { 
           transform: [{ translateY: toggleButtonTranslateY }],
-          backgroundColor: theme.toggleButtonBackground 
+          backgroundColor: theme.toggleButtonBackground,
+          bottom: 20,
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
