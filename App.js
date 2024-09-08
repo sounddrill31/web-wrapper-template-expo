@@ -63,28 +63,18 @@ export default function App() {
   };
 
   const barAnimation = useRef(new Animated.Value(1)).current;
-  const toggleButtonAnimation = useRef(new Animated.Value(0)).current;
 
   const toggleBar = () => {
     const newIsBarVisible = !isBarVisible;
     setIsBarVisible(newIsBarVisible);
     
-    Animated.parallel([
-      Animated.spring(barAnimation, {
-        toValue: newIsBarVisible ? 1 : 0,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-      Animated.spring(toggleButtonAnimation, {
-        toValue: newIsBarVisible ? 0 : 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      })
-    ]).start();
+    Animated.spring(barAnimation, {
+      toValue: newIsBarVisible ? 1 : 0,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
   };
-
 
   useEffect(() => {
     const subscription = ScreenOrientation.addOrientationChangeListener((event) => {
@@ -181,9 +171,9 @@ export default function App() {
     outputRange: [0.9, 1],
   });
 
-  const toggleButtonTranslateY = toggleButtonAnimation.interpolate({
+  const toggleButtonTranslateY = barAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -70],
+    outputRange: [0, -10], // Adjusted these values to position the button just above the bar
   });
 
   return (
