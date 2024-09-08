@@ -9,6 +9,16 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 const HOME_URL = 'https://github.com/login';
 const HOME_DOMAIN = 'github.com';
 
+
+// Icon mapping for iOS and fallback
+const iconMap = {
+  back: Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back',
+  home: 'home',
+  up: Platform.OS === 'ios' ? 'chevron-up' : 'arrow-up',
+  down: Platform.OS === 'ios' ? 'chevron-down' : 'arrow-down',
+};
+
+
 export default function App() {
   const webViewRef = useRef(null);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -29,7 +39,8 @@ export default function App() {
   };
 
   // Safely render Ionicons
-  const renderIcon = (name, size, color) => {
+  const renderIcon = (iconName, size, color) => {
+    const name = iconMap[iconName] || iconName;
     return (
       <Ionicons
         name={name}
@@ -209,7 +220,7 @@ export default function App() {
           onPress={goBack}
           disabled={!canGoBack}
         >
-          {renderIcon('arrow-back', 28, canGoBack ? theme.iconColor : theme.iconColor + '66')}
+          {renderIcon('back', 28, canGoBack ? theme.iconColor : theme.iconColor + '66')}
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonBackground }]}
@@ -227,7 +238,7 @@ export default function App() {
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
-          {renderIcon(isBarVisible ? "chevron-down" : "chevron-up", 34, theme.iconColor)}
+          {renderIcon(isBarVisible ? "down" : "up", 34, theme.iconColor)}
         </TouchableOpacity>
       </Animated.View>
     </View>
