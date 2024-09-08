@@ -9,15 +9,13 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 const HOME_URL = 'https://github.com/login';
 const HOME_DOMAIN = 'github.com';
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const IS_LARGE_DEVICE = SCREEN_WIDTH >= 768 || SCREEN_HEIGHT >= 768; // iPad mini is 768x1024
 
-// Icon mapping for iOS and fallback
-const iconMap = {
-  back: Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back',
-  home: 'home',
-  up: Platform.OS === 'ios' ? 'chevron-up' : 'arrow-up',
-  down: Platform.OS === 'ios' ? 'chevron-down' : 'arrow-down',
-};
-
+const BASE_BUTTON_SIZE = IS_LARGE_DEVICE ? 60 : 50;
+const BASE_ICON_SIZE = IS_LARGE_DEVICE ? 32 : 28;
+const TOGGLE_BUTTON_SIZE = IS_LARGE_DEVICE ? 70 : 60;
+const TOGGLE_ICON_SIZE = IS_LARGE_DEVICE ? 38 : 34;
 
 export default function App() {
   const webViewRef = useRef(null);
@@ -25,7 +23,7 @@ export default function App() {
   const [currentUrl, setCurrentUrl] = useState(HOME_URL);
   const colorScheme = useColorScheme();
   const [isBarVisible, setIsBarVisible] = useState(false);
-  const barHeight = useRef(new Animated.Value(80)).current;
+  const barHeight = useRef(new Animated.Value(BASE_BUTTON_SIZE + 20)).current;
   const toggleButtonBottom = useRef(new Animated.Value(20)).current;
   const [orientation, setOrientation] = useState('PORTRAIT');
 
@@ -140,7 +138,7 @@ export default function App() {
       bottom: 0,
       left: 0,
       right: 0,
-      height: 80,
+      height: BASE_BUTTON_SIZE + 20,
       paddingBottom: Platform.OS === 'ios' ? 20 : 0,
       overflow: 'hidden',
       ...Platform.select({
@@ -156,8 +154,11 @@ export default function App() {
       }),
     },
     button: {
-      borderRadius: 30,
-      padding: 16,
+      width: BASE_BUTTON_SIZE,
+      height: BASE_BUTTON_SIZE,
+      borderRadius: BASE_BUTTON_SIZE / 2,
+      justifyContent: 'center',
+      alignItems: 'center',
       margin: 10,
       ...Platform.select({
         ios: {
@@ -174,15 +175,18 @@ export default function App() {
     toggleButton: {
       position: 'absolute',
       right: 20,
-      borderRadius: 30,
-      padding: 16,
+      width: TOGGLE_BUTTON_SIZE,
+      height: TOGGLE_BUTTON_SIZE,
+      borderRadius: TOGGLE_BUTTON_SIZE / 2,
+      justifyContent: 'center',
+      alignItems: 'center',
       zIndex: 1000,
     },
   });
 
   const barTranslateY = barAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [80, 0],
+    outputRange: [BASE_BUTTON_SIZE + 10, 0],
   });
 
   const barScale = barAnimation.interpolate({
@@ -192,7 +196,7 @@ export default function App() {
 
   const toggleButtonTranslateY = barAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -80],
+    outputRange: [0, -(BASE_BUTTON_SIZE + 10)],
   });
 
   return (
@@ -220,13 +224,17 @@ export default function App() {
           onPress={goBack}
           disabled={!canGoBack}
         >
-          {renderIcon('back', 28, canGoBack ? theme.iconColor : theme.iconColor + '66')}
+          <Ionicons 
+            name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'} 
+            size={BASE_ICON_SIZE} 
+            color={canGoBack ? theme.iconColor : theme.iconColor + '66'} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonBackground }]}
           onPress={goHome}
         >
-          {renderIcon('home', 28, theme.iconColor)}
+          <Ionicons name="home" size={BASE_ICON_SIZE} color={theme.iconColor} />
         </TouchableOpacity>
       </Animated.View>
       <Animated.View style={[
@@ -238,7 +246,11 @@ export default function App() {
         }
       ]}>
         <TouchableOpacity onPress={toggleBar}>
-          {renderIcon(isBarVisible ? "down" : "up", 34, theme.iconColor)}
+          <Ionicons 
+            name={isBarVisible ? (Platform.OS === 'ios' ? 'chevron-down' : 'arrow-down') : (Platform.OS === 'ios' ? 'chevron-up' : 'arrow-up')} 
+            size={TOGGLE_ICON_SIZE} 
+            color={theme.iconColor} 
+          />
         </TouchableOpacity>
       </Animated.View>
     </View>
