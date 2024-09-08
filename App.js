@@ -139,7 +139,8 @@ export default function App() {
       left: 0,
       right: 0,
       height: BASE_BUTTON_SIZE + 20,
-      paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+      paddingVertical: Platform.OS === 'ios' ? 30 : 10, // Added vertical padding for centering
+      paddingBottom: Platform.OS === 'ios' ? 30 : 10, // Adjusted for iOS
       overflow: 'hidden',
       ...Platform.select({
         ios: {
@@ -159,7 +160,6 @@ export default function App() {
       borderRadius: BASE_BUTTON_SIZE / 2,
       justifyContent: 'center',
       alignItems: 'center',
-      margin: 10,
       ...Platform.select({
         ios: {
           shadowColor: '#000',
@@ -177,7 +177,7 @@ export default function App() {
       right: 20,
       width: TOGGLE_BUTTON_SIZE,
       height: TOGGLE_BUTTON_SIZE,
-      borderRadius: TOGGLE_BUTTON_SIZE / 2,
+      borderRadius: 24, // Modified to have curved corners
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1000,
