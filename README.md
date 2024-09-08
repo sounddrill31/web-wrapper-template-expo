@@ -14,7 +14,7 @@ You can do this using:
 git clone https://github.com/sounddrill31/web-wrapper-template-expo wrapper
 ```
 
-Now, enter the directory
+Now, enter the directory using `cd wrapper`
 ### Set up nvm 
 
 You can do this by following [these](https://github.com/nvm-sh/nvm#installing-and-updating) instructions
